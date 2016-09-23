@@ -11,7 +11,7 @@ pipeline {
         GIT_COMMITTER_EMAIL = "jenkins@example.com"
     }
 
-    image label:"any-executor"
+    agent label:"any-executor"
 
     stages {
         stage("build") {
