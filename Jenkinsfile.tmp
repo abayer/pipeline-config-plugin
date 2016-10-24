@@ -1,4 +1,5 @@
 node {
   checkout scm
   checkout scm
+  def foo = readFile("Dockerfile")
   }
