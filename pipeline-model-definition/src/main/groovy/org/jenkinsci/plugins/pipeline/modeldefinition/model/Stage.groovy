@@ -50,6 +50,8 @@ public class Stage implements NestedModel, Serializable {
     @Whitelisted
     PostStage post
 
+    StageDependencies dependsOn
+
     @Whitelisted
     Stage name(String n) {
         this.name = n
@@ -77,6 +79,11 @@ public class Stage implements NestedModel, Serializable {
     @Whitelisted
     Stage post(PostStage post) {
         this.post = post
+        return this
+    }
+
+    Stage dependsOn(String... dependsOn) {
+        this.dependsOn = new StageDependencies(dependsOn)
         return this
     }
 

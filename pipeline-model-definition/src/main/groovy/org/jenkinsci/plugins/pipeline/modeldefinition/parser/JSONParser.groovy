@@ -48,6 +48,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentL
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTPositionalArgumentList
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage
+import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStageDependencies
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStages
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTrigger
@@ -175,6 +176,10 @@ class JSONParser {
             stage.agent = parseAgent(j.get("agent"))
         }
 
+        if (j.has("dependsOn")) {
+            stage.depends = parseStageDependencies(j.get("dependsOn"))
+        }
+
         j.getJSONArray("branches").each { b ->
             JSONObject o = (JSONObject)b
             stage.branches.add(parseBranch(o))
@@ -189,8 +194,6 @@ class JSONParser {
         return stage
 
     }
-
-
 
     public @CheckForNull ModelASTBranch parseBranch(JSONObject j) {
         ModelASTBranch branch = new ModelASTBranch(j)
@@ -319,6 +322,24 @@ class JSONParser {
 
             return step
         }
+    }
+
+    public @CheckForNull ModelASTPositionalArgumentList parsePositionalArgumentList(Object o) {
+        ModelASTPositionalArgumentList argList = new ModelASTPositionalArgumentList(o)
+        if (o instanceof JSONArray) {
+            o.each { rawValue ->
+                ModelASTValue value = parseValue((JSONObject) rawValue)
+                argList.arguments.add(value)
+            }
+        } else if (o instanceof JSONObject) {
+            argList.arguments.add(parseValue(o))
+        } else if (o instanceof String) {
+            argList.arguments.add(ModelASTValue.fromConstant(o, o))
+        } else {
+            errorCollector.error(argList, "Object ${o} is neither a JSONArray nor a JSONObject")
+        }
+
+        return argList
     }
 
     public @CheckForNull ModelASTArgumentList parseArgumentList(Object o) {
@@ -466,6 +487,14 @@ class JSONParser {
             tools.tools.put(key, value)
         }
         return tools
+    }
+
+    public @CheckForNull ModelASTStageDependencies parseStageDependencies(Object j) {
+        ModelASTStageDependencies depends = new ModelASTStageDependencies(j)
+
+        depends.stages = parsePositionalArgumentList(j)
+
+        return depends
     }
 
     public @CheckForNull ModelASTAgent parseAgent(Object j) {

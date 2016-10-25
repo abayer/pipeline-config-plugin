@@ -51,6 +51,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTPostBuild
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTPostStage
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage
+import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStageDependencies
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStages
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStep
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTrigger
@@ -63,6 +64,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.model.BuildCondition
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.Agent
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.JobProperties
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.Parameters
+import org.jenkinsci.plugins.pipeline.modeldefinition.model.StageDependencyGraph
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.Tools
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.Triggers
 import org.jenkinsci.plugins.structs.SymbolLookup
@@ -525,6 +527,27 @@ class ModelValidatorImpl implements ModelValidator {
             valid = false
         }
 
+        StageDependencyGraph graph = new StageDependencyGraph()
+
+        // Need to validate stage dependencies from here rather than per-stage.
+        stages.stages.each { s ->
+            if (s.depends != null && s.depends.stages != null) {
+                s.depends.stages.arguments.each { v ->
+                    String dep = (String)v.getValue()
+                    if (dep == s.name) {
+                        errorCollector.error(v, "A stage cannot depend on itself")
+                        valid = false
+                    } else if (!stageNames.contains(dep)) {
+                        errorCollector.error(v, "Stage dependency '${dep}' is not a defined stage")
+                        valid = false
+                    } else if (!graph.addDependency(dep, s.name)) {
+                        errorCollector.error(v, "Cannot have stage '${s.name}' depend on stage '${dep}' - this would cause a circular dependency")
+                        valid = false
+                    }
+                }
+            }
+        }
+
         return valid
     }
 
@@ -546,6 +569,17 @@ class ModelValidatorImpl implements ModelValidator {
                     }
                 }
             }
+        }
+
+        return valid
+    }
+
+    public boolean validateElement(@Nonnull ModelASTStageDependencies depends) {
+        boolean valid = true
+
+        if (depends.stages == null || depends.stages.arguments.isEmpty()) {
+            errorCollector.error(depends, "dependsOn requires one or more stages as parameters")
+            valid = false
         }
 
         return valid

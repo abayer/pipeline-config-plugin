@@ -52,6 +52,29 @@ public class Stages implements NestedModel, Serializable {
         return stages
     }
 
+    Map<String,Stage> getStageNameMap() {
+        return stages.collectEntries { s ->
+            [s.name, s]
+        }
+    }
+
+    List<Stage> getLinearOrderedStages() {
+        StageDependencyGraph graph = new StageDependencyGraph()
+        stages.each { s ->
+            graph.addStage(s.name)
+
+            if (s.dependsOn != null && s.dependsOn.depends != null) {
+                s.dependsOn.depends.each { d ->
+                    graph.addDependency(d, s.name)
+                }
+            }
+        }
+
+        def stageMap = getStageNameMap()
+
+        return graph.linearOrderedStages.collect { stageMap.get(it) }
+    }
+
     @Override
     @Whitelisted
     public void modelFromMap(Map<String,Object> m) {

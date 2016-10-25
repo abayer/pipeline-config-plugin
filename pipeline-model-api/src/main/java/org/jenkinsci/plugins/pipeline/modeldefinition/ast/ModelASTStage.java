@@ -18,6 +18,7 @@ public final class ModelASTStage extends ModelASTElement {
     private ModelASTAgent agent;
     private List<ModelASTBranch> branches = new ArrayList<ModelASTBranch>();
     private ModelASTPostStage post;
+    private ModelASTStageDependencies depends;
 
     public ModelASTStage(Object sourceLocation) {
         super(sourceLocation);
@@ -40,6 +41,10 @@ public final class ModelASTStage extends ModelASTElement {
             o.accumulate("post", post.toJSON());
         }
 
+        if (depends != null) {
+            o.accumulate("dependsOn", depends.toJSON());
+        }
+
         return o;
     }
 
@@ -51,6 +56,9 @@ public final class ModelASTStage extends ModelASTElement {
         }
         if (agent != null) {
             agent.validate(validator);
+        }
+        if (depends != null) {
+            depends.validate(validator);
         }
         if (post != null) {
             post.validate(validator);
@@ -64,6 +72,9 @@ public final class ModelASTStage extends ModelASTElement {
         result.append("stage(\'").append(name.replace("'", "\\'")).append("\') {\n");
         if (agent != null) {
             result.append(agent.toGroovy());
+        }
+        if (depends != null) {
+            result.append(depends.toGroovy());
         }
 
         result.append("steps {\n");
@@ -104,6 +115,9 @@ public final class ModelASTStage extends ModelASTElement {
         if (agent != null) {
             agent.removeSourceLocation();
         }
+        if (depends != null) {
+            depends.removeSourceLocation();
+        }
         if (post != null) {
             post.removeSourceLocation();
         }
@@ -141,11 +155,20 @@ public final class ModelASTStage extends ModelASTElement {
         this.post = post;
     }
 
+    public ModelASTStageDependencies getDepends() {
+        return depends;
+    }
+
+    public void setDepends(ModelASTStageDependencies depends) {
+        this.depends = depends;
+    }
+
     @Override
     public String toString() {
         return "ModelASTStage{" +
                 "name='" + name + '\'' +
                 ", agent=" + agent +
+                ", dependsOn=" + depends +
                 ", branches=" + branches +
                 ", post=" + post +
                 "}";
@@ -171,6 +194,9 @@ public final class ModelASTStage extends ModelASTElement {
         if (getAgent() != null ? !getAgent().equals(that.getAgent()) : that.getAgent() != null) {
             return false;
         }
+        if (getDepends() != null ? !getDepends().equals(that.getDepends()) : that.getDepends() != null) {
+            return false;
+        }
         if (getPost() != null ? !getPost().equals(that.getPost()) : that.getPost() != null) {
             return false;
         }
@@ -183,6 +209,7 @@ public final class ModelASTStage extends ModelASTElement {
         int result = super.hashCode();
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         result = 31 * result + (getAgent() != null ? getAgent().hashCode() : 0);
+        result = 31 * result + (getDepends() != null ? getDepends().hashCode() : 0);
         result = 31 * result + (getBranches() != null ? getBranches().hashCode() : 0);
         return result;
     }

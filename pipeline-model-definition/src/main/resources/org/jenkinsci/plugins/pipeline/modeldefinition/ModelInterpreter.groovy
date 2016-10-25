@@ -87,8 +87,8 @@ public class ModelInterpreter implements Serializable {
                                 script.checkout script.scm
                         }
 
-                        for (int i = 0; i < root.stages.getStages().size(); i++) {
-                            Stage thisStage = root.stages.getStages().get(i)
+                        for (int i = 0; i < root.stages.getLinearOrderedStages().size(); i++) {
+                            Stage thisStage = root.stages.getLinearOrderedStages().get(i)
 
                             script.stage(thisStage.name) {
                                 if (firstError == null) {

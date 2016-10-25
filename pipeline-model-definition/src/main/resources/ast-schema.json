@@ -270,8 +270,17 @@
         {
           "type": "string",
           "enum": [
-            "none"
+            "none",
+            "any"
           ]
+        }
+      ]
+    },
+    "dependsOn": {
+      "description": "A list of other stage names this one will depend on",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/positionalArgumentList"
         }
       ]
     },
@@ -321,6 +330,9 @@
         },
         "post": {
           "$ref": "#/definitions/notifications"
+        },
+        "dependsOn": {
+          "$ref": "#/definitions/dependsOn"
         },
         "branches": {
           "type": "array",

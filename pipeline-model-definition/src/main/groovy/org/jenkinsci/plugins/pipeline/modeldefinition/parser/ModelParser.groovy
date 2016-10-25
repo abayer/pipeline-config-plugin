@@ -49,6 +49,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTNamedArgumentL
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTPositionalArgumentList
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTSingleArgument
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStage
+import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStageDependencies
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStages
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTrigger
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTTriggers
@@ -329,6 +330,9 @@ class ModelParser {
                         case 'post':
                             stage.post = parsePostStage(s)
                             break;
+                        case 'dependsOn':
+                            stage.depends = parseStageDependencies(s)
+                            break
                         default:
                             errorCollector.error(stage, "Unknown stage section '${name}'")
                     }
@@ -336,6 +340,21 @@ class ModelParser {
             }
         }
         return stage
+    }
+
+    protected ModelASTStageDependencies parseStageDependencies(Statement s) {
+        ModelASTStageDependencies depends = new ModelASTStageDependencies(s)
+        def mc = matchMethodCall(s);
+        if (mc == null) {
+            // Not sure of a better way to deal with this - it's a full-on parse-time failure.
+            errorCollector.error(depends,"Expected stage dependencies")
+        };
+
+        List<Expression> args = ((TupleExpression) mc.arguments).expressions
+
+        depends.stages = parsePositionalArgumentList(args)
+
+        return depends
     }
 
     protected List<ModelASTBranch> parseStepsBlock(BlockStatement block) {
@@ -668,6 +687,14 @@ class ModelParser {
         return key
     }
 
+    private ModelASTPositionalArgumentList parsePositionalArgumentList(List<Expression> args) {
+        ModelASTPositionalArgumentList l = new ModelASTPositionalArgumentList(args[0]);
+        args.each { e ->
+            l.arguments.add(parseArgument(e))
+        }
+        return l
+    }
+
     private ModelASTArgumentList parseArgumentList(List<Expression> args) {
         switch (args.size()) {
         case 0:
@@ -689,11 +716,7 @@ class ModelParser {
                 return singleArg
             }
         default:
-            ModelASTPositionalArgumentList l = new ModelASTPositionalArgumentList(args[0]);
-            args.each { e ->
-                l.arguments.add(parseArgument(e))
-            }
-            return l
+            return parsePositionalArgumentList(args)
         }
     }
 

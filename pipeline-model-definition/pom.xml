@@ -158,6 +158,12 @@
       <version>1.22</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.jgrapht</groupId>
+      <artifactId>jgrapht-core</artifactId>
+      <version>0.9.1</version>
+    </dependency>
+
     <!-- JSON schema stuff -->
     <dependency>
       <groupId>com.github.fge</groupId>

@@ -40,9 +40,13 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
 
+import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -130,6 +134,22 @@ public class BasicModelDefTest extends AbstractModelDefTest {
         j.assertLogContains("hello", b);
         j.assertLogContains("[Pipeline] { (bar)", b);
         j.assertLogContains("goodbye", b);
+    }
+
+    @Test
+    public void simpleDependsOn() throws Exception {
+        prepRepoWithJenkinsfile("simpleDependsOn");
+
+        WorkflowRun b = getAndStartBuild();
+
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
+        j.assertLogContains("[Pipeline] { (bar)", b);
+        j.assertLogContains("hello", b);
+        j.assertLogContains("[Pipeline] { (foo)", b);
+        j.assertLogContains("goodbye", b);
+
+        String buildLog = JenkinsRule.getLog(b);
+        assertThat(buildLog, stringContainsInOrder(Arrays.asList("hello", "goodbye")));
     }
 
     @Issue("JENKINS-38097")

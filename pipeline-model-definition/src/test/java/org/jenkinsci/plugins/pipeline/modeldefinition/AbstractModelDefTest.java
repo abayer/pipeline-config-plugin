@@ -118,6 +118,7 @@ public abstract class AbstractModelDefTest {
             "simpleJobProperties",
             "simpleTriggers",
             "simpleParameters",
+            "simpleDependsOn",
             "stringsNeedingEscapeLogic"
     );
 
