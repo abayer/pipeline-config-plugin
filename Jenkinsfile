@@ -1,36 +1,55 @@
-// This Jenkinsfile's main purpose is to show a real-world-ish example
-// of what Pipeline config syntax actually looks like. 
 pipeline {
-    // Make sure that the tools we need are installed and on the path.
-    tools {
-        maven "mvn"
-        jdk "jdk8"
+    agent none
+
+    environment {
+        MAVEN_OPTS = "-Xmx1024m"
     }
 
-    // Run on executors with the "docker" label, because it's either that or Windows here.
-    agent label:"java"
-
-    // Make sure we have GIT_COMMITTER_NAME and GIT_COMMITTER_EMAIL set due to machine weirdness.
-    environment {
-        GIT_COMMITTER_NAME = "jenkins"
-        GIT_COMMITTER_EMAIL = "jenkins@jenkins.io"
+    parameters {
+        stringParam(defaultValue: "install", description: "What Maven goal to call", name: "MAVEN_GOAL")
     }
     
-    // The order that sections are specified doesn't matter - this will still be run
-    // after the stages, even though it's specified before the stages.
-    postBuild {
-        // No matter what the build status is, run these steps. There are other conditions
-        // available as well, such as "success", "failed", "unstable", and "changed".
-        always {
-            archive "*/target/**/*"
-            junit '*/target/surefire-reports/*.xml'
-        }
+    jobProperties {
+        buildDiscarder(logRotator(numToKeepStr:'1'))
+    }
+    
+    triggers {
+        cron('@daily')
     }
 
     stages {
-        // While there's only one stage here, you can specify as many stages as you like!
-        stage("build") {
-            sh 'mvn clean install -Dmaven.test.failure.ignore=true'
+        stage("Build") {
+            agent docker: "maven:3.3.9-jdk-8"
+
+            steps {
+                checkout scm
+                sh "mvn clean ${env.MAVEN_GOAL} -B -Dmaven.test.failure.ignore=true"
+            }
+
+            post {
+                success {
+                    archive "**/target/**/*.jar"
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+    }
+
+    postBuild {
+        always {
+            echo "Build done"
+        }
+    }
+    
+    notifications {
+        success {
+            mail to: "abayer@cloudbees.com", subject: "Build Successful"
+        }
+        failure {
+            mail to: "abayer@cloudbees.com", subject: "Build Failed"
+        }
+        unstable {
+            mail to: "abayer@cloudbees.com", subject: "Build Unstable"
         }
     }
 
