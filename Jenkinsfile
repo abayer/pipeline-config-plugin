@@ -38,7 +38,7 @@ pipeline {
 
         stage("Test") {
             steps {
-                sh "mvn clean test -B -Dmaven.test.failure.ignore=true"
+                sh "mvn clean ${env.MAVEN_GOAL} -B -Dmaven.test.failure.ignore=true"
             }
 
             post {
