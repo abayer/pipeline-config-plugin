@@ -3,6 +3,9 @@ pipeline {
 
     environment {
         MAVEN_OPTS = "-Xmx1024m"
+        // These are needed because the docker image doesn't have a usable .gitconfig yaaaay
+        GIT_COMMITER_NAME = "abayer"
+        GIT_COMMITTER_EMAIL = "abayer@cloudbees.com"
     }
 
     parameters {
@@ -23,8 +26,6 @@ pipeline {
 
             steps {
                 checkout scm
-                sh "sudo git config --global user.name 'Someone'"
-                sh "sudo git config --global user.email 'abayer@cloudbees.com'"
                 sh "mvn clean ${env.MAVEN_GOAL} -B -Dmaven.test.failure.ignore=true"
             }
 
