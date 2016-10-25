@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent label:"any-executor"
 
     environment {
         MAVEN_OPTS = "-Xmx1024m"
@@ -42,10 +42,7 @@ pipeline {
         }
 
         stage("Test") {
-            agent label:"any-executor"
-
             steps {
-                checkout scm
                 sh "mvn clean test -B -Dmaven.test.failure.ignore=true"
             }
 
