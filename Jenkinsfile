@@ -10,7 +10,7 @@ pipeline {
     }
     
     jobProperties {
-        buildDiscarder(logRotator(numToKeepStr:'1'))
+        buildDiscarder(logRotator(numToKeepStr:'5'))
     }
     
     triggers {
