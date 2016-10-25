@@ -20,6 +20,11 @@ pipeline {
         cron('@daily')
     }
 
+    tools {
+        maven "Maven 3.3.9"
+        jdk "Oracle JDK 8u40"
+    }
+
     stages {
         stage("Build") {
             agent docker: "maven:3.3.9-jdk-8"
