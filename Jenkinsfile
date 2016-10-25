@@ -23,8 +23,8 @@ pipeline {
 
             steps {
                 checkout scm
-                sh "git config --global user.name 'Someone'"
-                sh "git config --global user.email 'abayer@cloudbees.com'"
+                sh "sudo git config --global user.name 'Someone'"
+                sh "sudo git config --global user.email 'abayer@cloudbees.com'"
                 sh "mvn clean ${env.MAVEN_GOAL} -B -Dmaven.test.failure.ignore=true"
             }
 
