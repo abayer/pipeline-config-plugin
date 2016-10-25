@@ -1,11 +1,8 @@
 pipeline {
-    agent label:"agent1"
+    agent none
 
     environment {
         MAVEN_OPTS = "-Xmx1024m"
-        // These are needed because the docker image doesn't have a usable .gitconfig yaaaay
-        GIT_COMMITER_NAME = "abayer"
-        GIT_COMMITTER_EMAIL = "abayer@cloudbees.com"
     }
 
     parameters {
@@ -37,6 +34,8 @@ pipeline {
         }
 
         stage("Test") {
+            agent label:"agent1"
+            
             steps {
                 sh "mvn clean ${env.MAVEN_GOAL} -B -Dmaven.test.failure.ignore=true"
             }
