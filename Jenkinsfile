@@ -26,12 +26,26 @@ pipeline {
 
             steps {
                 checkout scm
-                sh "mvn clean ${env.MAVEN_GOAL} -B -Dmaven.test.failure.ignore=true"
+                sh "mvn clean ${env.MAVEN_GOAL} -DskipTests"
             }
 
             post {
                 success {
                     archive "**/target/**/*.jar"
+                }
+            }
+        }
+
+        stage("Test") {
+            agent any
+
+            steps {
+                checkout scm
+                sh "mvn clean test -B -Dmaven.test.failure.ignore=true"
+            }
+
+            post {
+                success {
                     junit '**/target/surefire-reports/*.xml'
                 }
             }
