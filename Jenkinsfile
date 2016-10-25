@@ -1,5 +1,5 @@
 pipeline {
-    agent label:"any-executor"
+    agent label:"agent1"
 
     environment {
         MAVEN_OPTS = "-Xmx1024m"
@@ -18,11 +18,6 @@ pipeline {
     
     triggers {
         cron('@daily')
-    }
-
-    tools {
-        maven "Maven 3.3.9"
-        jdk "Oracle JDK 8u40"
     }
 
     stages {
