@@ -43,13 +43,13 @@ pipeline {
     
     notifications {
         success {
-            mail to: "abayer@cloudbees.com", subject: "Build Successful"
+            mail to: "abayer@cloudbees.com", subject: "Build Successful", body: "So there"
         }
         failure {
-            mail to: "abayer@cloudbees.com", subject: "Build Failed"
+            mail to: "abayer@cloudbees.com", subject: "Build Failed", body: "So there"
         }
         unstable {
-            mail to: "abayer@cloudbees.com", subject: "Build Unstable"
+            mail to: "abayer@cloudbees.com", subject: "Build Unstable", body: "So there"
         }
     }
 
