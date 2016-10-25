@@ -37,7 +37,7 @@ pipeline {
         }
 
         stage("Test") {
-            agent any
+            agent label:"any-executor"
 
             steps {
                 checkout scm
