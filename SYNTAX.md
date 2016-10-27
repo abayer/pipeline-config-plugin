@@ -166,6 +166,22 @@ tools {
 }
 ```
 
+### wrappers
+* *Description*: Defines "wrappers" to run the entire build within, such as `timeout`, `retry`, etc
+* *Required*: No
+* *Allowed In*: Top-level `pipeline` closure only - the actual steps can be used directly inside `stage`s.
+* *Parameters*: None
+* *Takes a Closure*: Yes
+* *Closure Contents*: The wrapper step to run with any arguments it needs. Do not include the closure it will wrap around.
+* *Examples*:
+
+```
+wrappers {
+    timeout(time:5, unit:"MINUTES")
+    retry(3)
+}
+```
+
 ### notifications
 * *Description*: Defines notifications to be sent after build completion, assuming build status conditions are met.
 * *Required*: No
