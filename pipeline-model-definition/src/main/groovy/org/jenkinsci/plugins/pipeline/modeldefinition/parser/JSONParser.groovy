@@ -96,7 +96,7 @@ class JSONParser implements Parser {
                     pipelineDef.environment = parseEnvironment(pipelineJson.getJSONArray("environment"))
                     break
                 case 'agent':
-                    pipelineDef.agent = parseAgent(pipelineJson.get("agent"))
+                    pipelineDef.agent = parseAgent(pipelineJson.getJSONArray("agent"))
                     break
                 case 'post':
                     pipelineDef.postBuild = parsePostBuild(pipelineJson.getJSONObject("post"))
@@ -144,7 +144,7 @@ class JSONParser implements Parser {
         stage.name = j.getString("name")
 
         if (j.has("agent")) {
-            stage.agent = parseAgent(j.get("agent"))
+            stage.agent = parseAgent(j.getJSONArray("agent"))
         }
 
         j.getJSONArray("branches").each { b ->
@@ -472,18 +472,32 @@ class JSONParser implements Parser {
         return tools
     }
 
-    public @CheckForNull ModelASTAgent parseAgent(Object j) {
-        ModelASTAgent agent = new ModelASTAgent(j)
+    public @CheckForNull ModelASTNestableMap parseNestableMap(JSONArray j) {
+        ModelASTNestableMap map = new ModelASTNestableMap(j)
 
         j.each { rawEntry ->
             JSONObject entry = (JSONObject) rawEntry
             // Passing the whole thing to parseKey to capture the JSONObject the "key" is in.
             ModelASTKey key = parseKey(entry)
 
-            ModelASTValue value = parseValue(entry.getJSONObject("value"))
+            def val = entry.get("value")
 
-            agent.variables.put(key, value)
+            if (val instanceof JSONArray) {
+                map.entries.put(key, parseNestableMap(val))
+            } else if (val instanceof JSONObject) {
+                map.entries.put(key, parseValue(val))
+            }
         }
+
+        return map
+    }
+
+    public @CheckForNull ModelASTAgent parseAgent(JSONArray j) {
+        ModelASTAgent agent = new ModelASTAgent(j)
+
+        ModelASTNestableMap map = parseNestableMap(j)
+
+        agent.entries.putAll(map.entries)
 
         return agent
     }

@@ -15,47 +15,27 @@ import java.util.Map;
  *
  * @author Andrew Bayer
  */
-public final class ModelASTAgent extends ModelASTElement {
-    private Map<ModelASTKey, ModelASTValue> variables = new LinkedHashMap<ModelASTKey, ModelASTValue>();
-
+public final class ModelASTAgent extends ModelASTNestableMap {
     public ModelASTAgent(Object sourceLocation) {
         super(sourceLocation);
     }
 
     @Override
-    public JSONArray toJSON() {
-        final JSONArray a = new JSONArray();
-
-        for (Map.Entry<ModelASTKey, ModelASTValue> entry: variables.entrySet()) {
-            JSONObject o = new JSONObject();
-            o.accumulate("key", entry.getKey().toJSON());
-            o.accumulate("value", entry.getValue().toJSON());
-            a.add(o);
-        }
-        return a;
-
-    }
-
-    @Override
     public void validate(ModelValidator validator) {
         validator.validateElement(this);
-
-        for (Map.Entry<ModelASTKey, ModelASTValue> entry : variables.entrySet()) {
-            entry.getKey().validate(validator);
-            entry.getValue().validate(validator);
-        }
+        super.validate(validator);
     }
 
     public List<String> getKeyNames() {
         List<String> names = new ArrayList<>();
-        for (ModelASTKey k : variables.keySet()) {
+        for (ModelASTKey k : getEntries().keySet()) {
             names.add(k.getKey());
         }
         return names;
     }
 
     public ModelASTKey keyFromName(String name) {
-        for (ModelASTKey k : variables.keySet()) {
+        for (ModelASTKey k : getEntries().keySet()) {
             if (name.equals(k.getKey())) {
                 return k;
             }
@@ -65,69 +45,23 @@ public final class ModelASTAgent extends ModelASTElement {
 
     @Override
     public String toGroovy() {
-        StringBuilder argStr = new StringBuilder();
-        // TODO: Stop special-casing agent none.
+        StringBuilder argStr = new StringBuilder("agent ");
+
         List<String> keys = getKeyNames();
         if (keys.size() == 1 && (keys.contains("none") || keys.contains("any"))) {
             argStr.append(keys.get(0));
+            argStr.append("\n");
         } else {
-            argStr.append("{\n");
-            for (Map.Entry<ModelASTKey, ModelASTValue> entry: variables.entrySet()) {
-                argStr.append(entry.getKey().toGroovy()).append(" ").append(entry.getValue().toGroovy()).append("\n");
-            }
-            argStr.append("}");
+            argStr.append(super.toGroovy());
         }
 
-        return "agent " + argStr.toString() + "\n";
-    }
-
-    @Override
-    public void removeSourceLocation() {
-        super.removeSourceLocation();
-        for (Map.Entry<ModelASTKey, ModelASTValue> entry : variables.entrySet()) {
-            entry.getKey().removeSourceLocation();
-            entry.getValue().removeSourceLocation();
-        }
-    }
-
-    public Map<ModelASTKey, ModelASTValue> getVariables() {
-        return variables;
-    }
-
-    public void setVariables(Map<ModelASTKey, ModelASTValue> variables) {
-        this.variables = variables;
+        return argStr.toString();
     }
 
     @Override
     public String toString() {
         return "ModelASTAgent{" +
-                "variables=" + variables +
+                "entries=" + getEntries() +
                 "}";
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-
-        ModelASTAgent that = (ModelASTAgent) o;
-
-        return getVariables() != null ? getVariables().equals(that.getVariables()) : that.getVariables() == null;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (getVariables() != null ? getVariables().hashCode() : 0);
-        return result;
-    }
-
 }

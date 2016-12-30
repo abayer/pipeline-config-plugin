@@ -433,7 +433,7 @@ class ModelParser implements Parser {
         def mc = matchMethodCall(st);
         if (mc == null) {
             if (st instanceof ExpressionStatement && st.expression instanceof MapExpression) {
-                errorCollector.error(thisProp, Messages.ModelParser_MapNotAllowed(Messages.Parser_Options()))
+                errorCollector.error(thisOpt, Messages.ModelParser_MapNotAllowed(Messages.Parser_Options()))
                 return thisOpt
             } else {
                 // Not sure of a better way to deal with this - it's a full-on parse-time failure.
@@ -643,6 +643,42 @@ class ModelParser implements Parser {
         return scriptBlock
     }
 
+    public @Nonnull ModelASTNestableMap parseNestableMap(Statement st) {
+        ModelASTNestableMap map = new ModelASTNestableMap(st)
+        def m = matchBlockStatement(st);
+        if (m == null) {
+            return map
+        } else {
+            eachStatement(m.body.code) { s ->
+                def mc = matchMethodCall(s);
+                if (mc == null) {
+                    // Not sure of a better way to deal with this - it's a full-on parse-time failure.
+                    errorCollector.error(map,Messages.ModelParser_ExpectedMapEntry());
+                }
+
+                def keyName = parseKey(mc.method);
+
+                def bs = matchBlockStatement(s)
+                if (bs != null) {
+                    map.entries[keyName] = parseNestableMap(s)
+                } else {
+                    List<Expression> args = ((TupleExpression) mc.arguments).expressions
+                    if (args.isEmpty()) {
+                        errorCollector.error(keyName, Messages.ModelParser_NoValueForMapEntry(keyName.key))
+                    } else if (args.size() > 1) {
+                        errorCollector.error(keyName, Messages.ModelParser_TooManyValuesForMapEntry(keyName.key))
+                    } else {
+                        map.entries[keyName] = parseArgument(args[0])
+                    }
+
+                }
+
+            }
+        }
+
+        return map
+    }
+
     /**
      * Parses a statement into a {@link ModelASTAgent}
      */
@@ -665,29 +701,13 @@ class ModelParser implements Parser {
                     if (agentCode.key != "none" && agentCode.key != "any") {
                         errorCollector.error(agent, Messages.ModelParser_InvalidAgent())
                     } else {
-                        agent.variables[agentCode] = ModelASTValue.fromConstant(true, null)
+                        agent.entries[agentCode] = ModelASTValue.fromConstant(true, null)
                     }
                 }
             }
         } else {
-            eachStatement(m.body.code) { s ->
-                def mc = matchMethodCall(s);
-                if (mc == null) {
-                    // Not sure of a better way to deal with this - it's a full-on parse-time failure.
-                    errorCollector.error(agent,Messages.ModelParser_ExpectedAgentKeyValue());
-                }
-
-                def agentKey = parseKey(mc.method);
-
-                List<Expression> args = ((TupleExpression) mc.arguments).expressions
-                if (args.isEmpty()) {
-                    errorCollector.error(agentKey, Messages.ModelParser_NoArgForAgentKey(agentKey.key))
-                } else if (args.size() > 1) {
-                    errorCollector.error(agentKey, Messages.ModelParser_TooManyArgsForAgentKey(agentKey.key))
-                } else {
-                    agent.variables[agentKey] = parseArgument(args[0])
-                }
-            }
+            ModelASTNestableMap map = parseNestableMap(st)
+            agent.entries.putAll(map.entries)
         }
 
         return agent

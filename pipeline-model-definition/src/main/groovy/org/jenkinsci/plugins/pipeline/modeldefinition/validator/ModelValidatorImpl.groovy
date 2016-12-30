@@ -165,6 +165,11 @@ class ModelValidatorImpl implements ModelValidator {
         return valid
     }
 
+    public boolean validateElement(ModelASTNestableMap map) {
+        // Currently this is a no-op. Debated requiring non-empty but not sure yet.
+        return true
+    }
+
     public boolean validateElement(ModelASTWhen when) {
         //TODO can we evaluate if the closure will return something that can be tries for true?
         if (when.toGroovy() =~ /\Awhen\s[{\s}]*\z/) {
@@ -560,7 +565,8 @@ class ModelValidatorImpl implements ModelValidator {
                     valid = false
                 }
             }
-            agent.variables.each { k, v ->
+            // TODO: Properly handle validation of nested maps...
+            agent.entries.each { k, v ->
                 List<String> validParamNames = model.parameters.collect { it.name }
                 if (!validParamNames.contains(k.key)) {
                     errorCollector.error(k, Messages.ModelValidatorImpl_InvalidAgentParameter(k.key, typeName, validParamNames))

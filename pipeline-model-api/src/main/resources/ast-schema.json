@@ -20,6 +20,37 @@
       "additionalProperties": false
 
     },
+    "nestableMapEntry": {
+      "description": "An entry in a nested map within another map",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/definitions/nestableMapValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "nestableMapValue": {
+      "description": "Possible values for a nestable map entry",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/rawArgument"
+        },
+        {
+          "$ref": "#/definitions/nestableMap"
+        }
+      ]
+    },
+    "nestableMap": {
+      "description": "Name/value-or-map argument pairs used as named parameters",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/nestableMapEntry"
+      }
+    },
     "argumentValue": {
       "description": "The value for an argument",
       "type": "object",
@@ -279,12 +310,13 @@
       "description": "Determines the node/image in which the build will run from either named parameters or a bare none",
       "anyOf": [
         {
-          "$ref": "#/definitions/argumentList"
+          "$ref": "#/definitions/nestableMap"
         },
         {
           "type": "string",
           "enum": [
-            "none"
+            "none",
+            "any"
           ]
         }
       ]
