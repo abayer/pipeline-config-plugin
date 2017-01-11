@@ -8,8 +8,10 @@ pipeline {
     }
 
     // Run on executors with the "docker" label, because it's either that or Windows here.
-    agent label:"java"
-
+    agent {
+        label "java"
+    }
+    
     // Make sure we have GIT_COMMITTER_NAME and GIT_COMMITTER_EMAIL set due to machine weirdness.
     environment {
         GIT_COMMITTER_NAME = "jenkins"
