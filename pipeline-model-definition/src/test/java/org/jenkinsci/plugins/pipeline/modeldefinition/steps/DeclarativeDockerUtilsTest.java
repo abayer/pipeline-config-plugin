@@ -47,11 +47,11 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 
 /**
- * Tests {@link DeclarativePropsStep}.
+ * Tests {@link DeclarativeDockerUtils}.
  *
  * And related configurations like {@link DockerPropertiesProvider}.
  */
-public class DeclarativePropsStepTest extends AbstractModelDefTest {
+public class DeclarativeDockerUtilsTest extends AbstractModelDefTest {
     private static final UsernamePasswordCredentialsImpl globalCred = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,
             "globalCreds", "sample", "bobby", "s3cr37");
     private static final UsernamePasswordCredentialsImpl folderCred = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,
@@ -70,7 +70,7 @@ public class DeclarativePropsStepTest extends AbstractModelDefTest {
     public void plainSystemConfig() throws Exception {
         GlobalConfig.get().setDockerLabel("config_docker");
         GlobalConfig.get().setRegistry(new DockerRegistryEndpoint("https://docker.registry", globalCred.getId()));
-        expect("declarativeProps")
+        expect("declarativeDockerConfig")
                 .logContains("Docker Label is: config_docker",
                         "Registry URL is: https://docker.registry",
                         "Registry Creds ID is: " + globalCred.getId()).go();
@@ -89,7 +89,7 @@ public class DeclarativePropsStepTest extends AbstractModelDefTest {
         Folder folder = j.createProject(Folder.class);
         getFolderStore(folder).addCredentials(Domain.global(), folderCred);
         folder.addProperty(new FolderConfig("folder_docker", "https://folder.registry", folderCred.getId()));
-        expect("declarativeProps")
+        expect("declarativeDockerConfig")
                 .inFolder(folder)
                 .runFromRepo(false)
                 .logContains("Docker Label is: folder_docker",
@@ -103,7 +103,7 @@ public class DeclarativePropsStepTest extends AbstractModelDefTest {
         getFolderStore(folder).addCredentials(Domain.global(), folderCred);
         getFolderStore(folder).addCredentials(Domain.global(), grandParentCred);
         folder.addProperty(new FolderConfig("folder_docker", "https://folder.registry", folderCred.getId()));
-        expect("declarativePropsWithOverride")
+        expect("declarativeDockerConfigWithOverride")
                 .inFolder(folder)
                 .runFromRepo(false)
                 .logContains("Docker Label is: other-label",
@@ -118,7 +118,7 @@ public class DeclarativePropsStepTest extends AbstractModelDefTest {
         Folder folder = j.createProject(Folder.class);
         getFolderStore(folder).addCredentials(Domain.global(), folderCred);
         folder.addProperty(new FolderConfig("folder_docker", "https://folder.registry", folderCred.getId()));
-        expect("declarativeProps")
+        expect("declarativeDockerConfig")
                 .inFolder(folder)
                 .runFromRepo(false)
                 .logContains("Docker Label is: folder_docker",
@@ -135,7 +135,7 @@ public class DeclarativePropsStepTest extends AbstractModelDefTest {
         getFolderStore(grandParent).addCredentials(Domain.global(), grandParentCred);
         grandParent.addProperty(new FolderConfig("parent_docker", "https://parent.registry", grandParentCred.getId()));
         Folder parent = grandParent.createProject(Folder.class, "testParent"); //Can be static since grandParent should be unique
-        expect("declarativeProps")
+        expect("declarativeDockerConfig")
                 .inFolder(parent)
                 .runFromRepo(false)
                 .logContains("Docker Label is: parent_docker",
@@ -152,7 +152,7 @@ public class DeclarativePropsStepTest extends AbstractModelDefTest {
         getFolderStore(parent).addCredentials(Domain.global(), folderCred);
         parent.addProperty(new FolderConfig("folder_docker", "https://folder.registry", folderCred.getId()));
 
-        expect("declarativeProps")
+        expect("declarativeDockerConfig")
                 .inFolder(parent)
                 .runFromRepo(false)
                 .logContains("Docker Label is: folder_docker",

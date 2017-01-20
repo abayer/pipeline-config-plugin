@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  */
 
-import org.jenkinsci.plugins.pipeline.modeldefinition.steps.DeclarativePropsStep
+import org.jenkinsci.plugins.pipeline.modeldefinition.steps.DeclarativeDockerUtils
 
-echo "Docker Label is: ${declarativeProps(property: DeclarativePropsStep.Property.LABEL, override: "other-label")}"
-echo "Registry URL is: ${declarativeProps(property: DeclarativePropsStep.Property.REGISTRY_URL, override: "https://other.registry")}"
-echo "Registry Creds ID is: ${declarativeProps(property: DeclarativePropsStep.Property.REGISTRY_CREDENTIALS, override: "grandParentCreds")}"
+echo "Docker Label is: ${DeclarativeDockerUtils.getLabel('other-label')}"
+echo "Registry URL is: ${DeclarativeDockerUtils.getRegistryUrl('https://other.registry')}"
+echo "Registry Creds ID is: ${DeclarativeDockerUtils.getRegistryCredentialsId('grandParentCreds')}"
