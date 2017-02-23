@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
  */
 
 package org.jenkinsci.plugins.pipeline.modeldefinition.environment;
@@ -36,13 +35,12 @@ import java.util.List;
 public abstract class DeclarativeEnvironmentContributor<C extends WithScriptDescribable<C>> extends WithScriptDescribable<C> {
 
     public List<String> generate(CpsScript script, String key) throws Exception {
-        return ((DeclarativeEnvironmentContributorScript)getScript(script)).generate(key);
+        return ((DeclarativeEnvironmentContributorScript<?>)getScript(script)).generate(key);
     }
 
     /**
      * Marker interface for a generator that is not part of the standard "withEnv" flow.
      * But one that needs special handling.
-     * @see com.cloudbees.plugins.credentials.CredentialsStoreAction.CredentialsWrapper
      */
     public interface MutedGenerator {
 
