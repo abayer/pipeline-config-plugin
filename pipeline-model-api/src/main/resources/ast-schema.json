@@ -170,6 +170,27 @@
       },
       "additionalProperties": false
     },
+    "environmentContributor": {
+      "description": "One or more method calls in an environment contributor",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "contents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/methodCall"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "type",
+        "contents"
+      ],
+      "additionalProperties": false
+    },
     "triggers": {
       "description": "One or more triggers",
       "type": "object",
@@ -295,10 +316,17 @@
     "environment": {
       "description": "A block of key = value pairs, used to set environment variables for the build",
       "type": "array",
+      "minItems": 1,
       "items": {
-        "$ref": "#/definitions/argumentValue"
-      },
-      "minItems": 1
+        "anyOf": [
+          {
+            "$ref": "#/definitions/argumentValue"
+          },
+          {
+            "$ref": "#/definitions/environmentContributor"
+          }
+        ]
+      }
     },
     "tools": {
       "description": "A block of 'toolType \"toolVersion\"' pairs listing tools to autoinstall and add to the path",

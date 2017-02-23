@@ -457,12 +457,25 @@ class JSONParser implements Parser {
 
         j.node.eachWithIndex { JsonNode entry, int i ->
             JsonTree entryTree = j.append(JsonPointer.of(i))
-            // Passing the whole thing to parseKey to capture the JSONObject the "key" is in.
-            ModelASTKey key = parseKey(entryTree.append(JsonPointer.of("key")))
 
-            ModelASTValue value = parseValue(entryTree.append(JsonPointer.of("value")))
+            if (entryTree.node.has("type")) {
+                ModelASTEnvironmentContributor contributor = new ModelASTEnvironmentContributor(entryTree)
 
-            environment.variables.put(key, value)
+                contributor.type = entryTree.node.get("type").asText()
+
+                JsonTree contents = entryTree.append(JsonPointer.of("contents"))
+                contents.node.eachWithIndex { JsonNode c, int k ->
+                    JsonTree content = contents.append(JsonPointer.of(k))
+                    contributor.contents.add(parseMethodCall(content))
+                }
+            } else {
+                // Passing the whole thing to parseKey to capture the JSONObject the "key" is in.
+                ModelASTKey key = parseKey(entryTree.append(JsonPointer.of("key")))
+
+                ModelASTValue value = parseValue(entryTree.append(JsonPointer.of("value")))
+
+                environment.variables.put(key, value)
+            }
         }
         return environment
     }

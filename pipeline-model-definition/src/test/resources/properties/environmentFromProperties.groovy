@@ -29,24 +29,35 @@ package properties
 pipeline {
     environment {
         FOO = "BAZ"
-        PROP = properties("marker.properties")
+        properties {
+            fromFile "marker.properties"
+        }
     }
     agent any
 
     stages {
         stage("foo") {
+            steps {
+                sh '''
+echo "FOO is $FOO"
+echo "NAME is $NAME"
+echo "NUM is $NUM"
+'''
+            }
+        }
+        stage("bar") {
             environment {
                 FOO = "BAR"
-                P_ = properties("stage/marker.properties")
+                properties {
+                    fromFile "stage/marker.properties"
+                }
             }
 
             steps {
                 sh '''
 echo "FOO is $FOO"
-echo "PROP_NAME is $PROP_NAME"
-echo "PROP_NUM is $PROP_NUM"
-echo "P_NAME is $P_NAME"
-echo "P_NUM is $P_NUM"
+echo "NAME is $NAME"
+echo "NUM is $NUM"
 '''
             }
         }

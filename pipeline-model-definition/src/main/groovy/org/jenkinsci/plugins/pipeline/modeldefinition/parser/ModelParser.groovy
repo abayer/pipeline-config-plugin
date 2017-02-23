@@ -238,6 +238,17 @@ class ModelParser implements Parser {
                             r.variables[parseKey(exp.leftExpression)] = parseArgument(exp.rightExpression)
                             return
                         }
+                    } else if (matchBlockStatement(s) != null) {
+                        ModelASTEnvironmentContributor contributor = new ModelASTEnvironmentContributor(s)
+                        def block = matchBlockStatement(s)
+                        contributor.type = block.methodName
+                        eachStatement(block.body.code) {
+                            if (it instanceof MethodCallExpression) {
+                                contributor.contents.add(parseMethodCall(it))
+                            } else {
+                                errorCollector.error(new ModelASTMethodCall(it), Messages.ModelParser_InvalidEnvContributor())
+                            }
+                        }
                     } else {
                         ModelASTKey badKey = new ModelASTKey(exp)
                         String srcTxt = getSourceText((ASTNode)exp)

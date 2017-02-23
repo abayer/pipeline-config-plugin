@@ -38,6 +38,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Messages
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import org.jenkinsci.plugins.pipeline.modeldefinition.agent.DeclarativeAgentDescriptor
 import org.jenkinsci.plugins.pipeline.modeldefinition.ast.*
+import org.jenkinsci.plugins.pipeline.modeldefinition.environment.DeclarativeEnvironmentContributorDescriptor
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.BuildCondition
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.Options
 import org.jenkinsci.plugins.pipeline.modeldefinition.model.Parameters
@@ -122,7 +123,7 @@ class ModelValidatorImpl implements ModelValidator {
     public boolean validateElement(@Nonnull ModelASTEnvironment env) {
         boolean valid = true
 
-        if (env.variables.isEmpty()) {
+        if (env.variables.isEmpty() && env.contributors.isEmpty()) {
             errorCollector.error(env, Messages.ModelValidatorImpl_NoEnvVars())
             valid = false
         }
@@ -130,6 +131,37 @@ class ModelValidatorImpl implements ModelValidator {
             if (!Utils.validEnvIdentifier(k.key)) {
                 errorCollector.error(k, Messages.ModelValidatorImpl_InvalidIdentifierInEnv(k.key))
                 valid = false
+            }
+        }
+
+        return valid
+    }
+
+    public boolean validateElement(@Nonnull ModelASTEnvironmentContributor contributor) {
+        boolean valid = true
+
+        List<String> orderedNames = DeclarativeEnvironmentContributorDescriptor.all().findAll { it.isBlock() }.collect { it.name }
+
+        String typeName = contributor.type
+        if (typeName == null) {
+            errorCollector.error(contributor, Messages.ModelValidatorImpl_NoEnvContributorType())
+            valid = false
+        } else {
+            if (!orderedNames.contains(typeName)) {
+                errorCollector.error(contributor, Messages.ModelValidatorImpl_InvalidEnvContributorType(typeName, orderedNames))
+                valid = false
+            } else {
+                DeclarativeEnvironmentContributorDescriptor descriptor = DeclarativeEnvironmentContributorDescriptor.byName(typeName)
+
+                contributor.contents.each { m ->
+                    if (!descriptor.blockMethods().contains(m.name)) {
+                        errorCollector.error(m,
+                            Messages.ModelValidatorImpl_InvalidEnvContributorMethod(m.name,
+                                typeName,
+                                descriptor.blockMethods()))
+                        valid = false
+                    }
+                }
             }
         }
 

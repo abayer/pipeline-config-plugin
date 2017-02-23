@@ -29,7 +29,9 @@ package properties
 pipeline {
     environment {
         FOO = "BAZ"
-        PROP = properties([data: [NAME: "Bobby", NUM: 5]]) //A bit cheaty but need to workaround the argument unpacking
+        properties {
+            fromMap([NAME: "Bobby", NUM: 5])
+        }
     }
     agent any
 
@@ -42,8 +44,8 @@ pipeline {
             steps {
                 sh '''
 echo "FOO is $FOO"
-echo "PROP_NAME is $PROP_NAME"
-echo "PROP_NUM is $PROP_NUM"
+echo "NAME is $NAME"
+echo "NUM is $NUM"
 '''
             }
         }

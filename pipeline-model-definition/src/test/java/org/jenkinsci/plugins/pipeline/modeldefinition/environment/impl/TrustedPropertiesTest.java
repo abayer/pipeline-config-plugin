@@ -31,6 +31,7 @@ import org.jenkinsci.plugins.workflow.libs.GlobalLibraries;
 import org.jenkinsci.plugins.workflow.libs.LibraryConfiguration;
 import org.jenkinsci.plugins.workflow.libs.SCMSourceRetriever;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -72,6 +73,7 @@ public class TrustedPropertiesTest extends AbstractModelDefTest {
                         "P_NUM is 0").go();
     }
 
+    @Ignore("Prefix not yet relevant in new world")
     @Test
     public void emptyPrefixStageOverride() throws Exception {
         expect("properties", "environmentFromPropertiesEmptyPrefix")

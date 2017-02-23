@@ -29,7 +29,9 @@ package properties
 pipeline {
     environment {
         FOO = "BAZ"
-        _ = properties("marker.properties")
+        properties {
+            fromFile "marker.properties"
+        }
     }
     agent any
 
@@ -37,7 +39,9 @@ pipeline {
         stage("foo") {
             environment {
                 FOO = "BAR"
-                _ = properties("stage/marker.properties")
+                properties {
+                    fromFile "stage/marker.properties"
+                }
             }
 
             steps {

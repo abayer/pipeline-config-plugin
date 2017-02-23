@@ -33,6 +33,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Read environment from a properties file in the scm.
@@ -63,6 +65,15 @@ public class TrustedProperties extends DeclarativeEnvironmentContributor<Trusted
 
     @Extension @Symbol("properties")
     public static class DescriptorImpl extends DeclarativeEnvironmentContributorDescriptor<TrustedProperties> {
+        @Override
+        public boolean isBlock() {
+            return true;
+        }
 
+        @Override
+        public List<String> blockMethods() {
+            // TODO: This should end up pulling from an extension point, most likely.
+            return Arrays.asList("fromString", "fromSCM", "fromLibrary", "fromMap", "fromFile");
+        }
     }
 }

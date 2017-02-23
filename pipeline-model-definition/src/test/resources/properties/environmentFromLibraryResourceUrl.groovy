@@ -30,7 +30,9 @@ import org.jenkinsci.plugins.workflow.libs.Library
 pipeline {
     environment {
         FOO = "BAZ"
-        PROP = properties(data: "foo/bar.properties", type: "resource")
+        properties {
+            fromResource "foo/bar.properties"
+        }
     }
     agent any
 
@@ -43,8 +45,8 @@ pipeline {
             steps {
                 sh '''
 echo "FOO is $FOO"
-echo "PROP_NAME is $PROP_NAME"
-echo "PROP_NUM is $PROP_NUM"
+echo "NAME is $NAME"
+echo "NUM is $NUM"
 '''
             }
         }

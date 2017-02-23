@@ -20,17 +20,67 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
  */
 
 package org.jenkinsci.plugins.pipeline.modeldefinition.environment;
 
+import hudson.ExtensionList;
 import org.jenkinsci.plugins.pipeline.modeldefinition.withscript.WithScriptDescriptor;
+import org.jenkinsci.plugins.structs.SymbolLookup;
+import org.jenkinsci.plugins.structs.describable.DescribableModel;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base {@code Descriptor} for types of {@link DeclarativeEnvironmentContributor}s.
  */
-public class DeclarativeEnvironmentContributorDescriptor<C extends DeclarativeEnvironmentContributor<C>> extends WithScriptDescriptor<C> {
+public abstract class DeclarativeEnvironmentContributorDescriptor<C extends DeclarativeEnvironmentContributor<C>> extends WithScriptDescriptor<C> {
 
+    public abstract boolean isBlock();
 
+    public List<String> blockMethods() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Get all {@link DeclarativeEnvironmentContributorDescriptor}s.
+     *
+     * @return a list of all {@link DeclarativeEnvironmentContributorDescriptor}s registered.`
+     */
+    public static ExtensionList<DeclarativeEnvironmentContributorDescriptor> all() {
+        return ExtensionList.lookup(DeclarativeEnvironmentContributorDescriptor.class);
+    }
+
+    /**
+     * Get a map of name-to-{@link DescribableModel} of all known/registered descriptors.
+     *
+     * @return A map of name-to-{@link DescribableModel}s
+     */
+    public static Map<String,DescribableModel> getDescribableModels() {
+        Map<String,DescribableModel> models = new HashMap<>();
+
+        for (DeclarativeEnvironmentContributorDescriptor d : all()) {
+            for (String s : SymbolLookup.getSymbolValue(d)) {
+                models.put(s, new DescribableModel<>(d.clazz));
+            }
+        }
+
+        return models;
+    }
+
+    /**
+     * Get the descriptor for a given name or null if not found.
+     *
+     * @param name The name for the descriptor to look up
+     * @return The corresponding descriptor or null if not found.
+     */
+    @Nullable
+    public static DeclarativeEnvironmentContributorDescriptor byName(@Nonnull String name) {
+        return (DeclarativeEnvironmentContributorDescriptor) SymbolLookup.get().findDescriptor(DeclarativeEnvironmentContributor.class, name);
+    }
 }

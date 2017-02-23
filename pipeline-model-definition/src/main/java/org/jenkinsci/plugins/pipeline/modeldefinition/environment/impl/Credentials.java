@@ -96,6 +96,9 @@ public class Credentials extends DeclarativeEnvironmentContributor<Credentials> 
 
     @Extension @Symbol("credentials")
     public static class DescriptorImpl extends DeclarativeEnvironmentContributorDescriptor<Credentials> {
-
+        @Override
+        public boolean isBlock() {
+            return false;
+        }
     }
 }

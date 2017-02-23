@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.pipeline.modeldefinition.ast;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -13,6 +15,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.validator.ModelValidator;
  */
 public final class ModelASTEnvironment extends ModelASTElement {
     private Map<ModelASTKey, ModelASTValue> variables = new LinkedHashMap<ModelASTKey, ModelASTValue>();
+    private List<ModelASTEnvironmentContributor> contributors = new ArrayList<>();
 
     public ModelASTEnvironment(Object sourceLocation) {
         super(sourceLocation);
@@ -20,15 +23,20 @@ public final class ModelASTEnvironment extends ModelASTElement {
 
     @Override
     public JSONArray toJSON() {
-        final JSONArray a = new JSONArray();
-        for (Map.Entry<ModelASTKey, ModelASTValue> entry: variables.entrySet()) {
+        JSONArray a = new JSONArray();
+
+        for (Map.Entry<ModelASTKey, ModelASTValue> entry : variables.entrySet()) {
             JSONObject o = new JSONObject();
             o.accumulate("key", entry.getKey().toJSON());
             o.accumulate("value", entry.getValue().toJSON());
             a.add(o);
         }
-        return a;
 
+        for (ModelASTEnvironmentContributor c : contributors) {
+            a.add(c.toJSON());
+        }
+
+        return a;
     }
 
     @Override
@@ -38,6 +46,9 @@ public final class ModelASTEnvironment extends ModelASTElement {
             entry.getKey().validate(validator);
             entry.getValue().validate(validator);
         }
+        for (ModelASTEnvironmentContributor contributor : contributors) {
+            contributor.validate(validator);
+        }
     }
 
     @Override
@@ -45,6 +56,9 @@ public final class ModelASTEnvironment extends ModelASTElement {
         StringBuilder result = new StringBuilder("environment {\n");
         for (Map.Entry<ModelASTKey, ModelASTValue> entry : variables.entrySet()) {
             result.append(entry.getKey().toGroovy()).append(" = ").append(entry.getValue().toGroovy()).append('\n');
+        }
+        for (ModelASTEnvironmentContributor contributor : contributors) {
+            result.append(contributor.toGroovy());
         }
         result.append("}\n");
         return result.toString();
@@ -57,6 +71,17 @@ public final class ModelASTEnvironment extends ModelASTElement {
             entry.getKey().removeSourceLocation();
             entry.getValue().removeSourceLocation();
         }
+        for (ModelASTEnvironmentContributor contributor : contributors) {
+            contributor.removeSourceLocation();
+        }
+    }
+
+    public List<ModelASTEnvironmentContributor> getContributors() {
+        return contributors;
+    }
+
+    public void setContributors(List<ModelASTEnvironmentContributor> contributors) {
+        this.contributors = contributors;
     }
 
     public Map<ModelASTKey, ModelASTValue> getVariables() {
@@ -71,6 +96,7 @@ public final class ModelASTEnvironment extends ModelASTElement {
     public String toString() {
         return "ModelASTEnvironment{" +
                 "variables=" + variables +
+                ", contributors=" + contributors +
                 "}";
     }
 
@@ -88,6 +114,10 @@ public final class ModelASTEnvironment extends ModelASTElement {
 
         ModelASTEnvironment that = (ModelASTEnvironment) o;
 
+        if (getContributors() != null ? !getContributors().equals(that.getContributors()) : that.getContributors() != null) {
+            return false;
+        }
+
         return getVariables() != null ? getVariables().equals(that.getVariables()) : that.getVariables() == null;
 
     }
@@ -96,6 +126,7 @@ public final class ModelASTEnvironment extends ModelASTElement {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (getVariables() != null ? getVariables().hashCode() : 0);
+        result = 31 * result + (getContributors() != null ? getContributors().hashCode() : 0);
         return result;
     }
 }
