@@ -30,7 +30,7 @@ import org.jenkinsci.plugins.workflow.libs.Library
 pipeline {
     environment {
         FOO = "BAZ"
-        PROP = properties("resources://foo/bar.properties")
+        PROP = properties(data: "foo/bar.properties", type: "resource")
     }
     agent any
 

@@ -60,11 +60,10 @@ class TrustedPropertiesScript extends DeclarativeEnvironmentContributorScript<Tr
                 content = sData
             } else {
                 //treat it as a path
-                if (sData.startsWith("resources://")) { //TODO should be an extension
-                    content = script.libraryResource(sData.drop(12))
-                } else if (sData.startsWith("scm://")) { //TODO should be an extension
-                    content = script.readTrusted(sData.drop(6))
-                } else { //Hey, someone might have missed the switch to url?
+                if (describable.type == "resource") { //TODO should be an extension
+                    content = script.libraryResource(sData)
+                } else {
+                    // TODO: Do we want to enable both reading from SCM and reading from a local file?
                     content = script.readTrusted(sData)
                 }
             }

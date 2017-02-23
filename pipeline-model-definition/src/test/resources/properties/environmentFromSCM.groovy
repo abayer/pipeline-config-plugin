@@ -29,7 +29,7 @@ package properties
 pipeline {
     environment {
         FOO = "BAZ"
-        PROP = properties("scm://marker.properties")
+        PROP = properties("marker.properties")
     }
     agent any
 
@@ -37,7 +37,7 @@ pipeline {
         stage("foo") {
             environment {
                 FOO = "BAR"
-                P_ = properties("scm://stage/marker.properties")
+                P_ = properties("stage/marker.properties")
             }
 
             steps {

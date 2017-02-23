@@ -30,6 +30,9 @@ import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.pipeline.modeldefinition.environment.DeclarativeEnvironmentContributor;
 import org.jenkinsci.plugins.pipeline.modeldefinition.environment.DeclarativeEnvironmentContributorDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
+import javax.annotation.CheckForNull;
 
 /**
  * Read environment from a properties file in the scm.
@@ -37,6 +40,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class TrustedProperties extends DeclarativeEnvironmentContributor<TrustedProperties> {
 
     private final Object data;
+    private String type;
 
     @DataBoundConstructor
     public TrustedProperties(Object data) {
@@ -45,6 +49,16 @@ public class TrustedProperties extends DeclarativeEnvironmentContributor<Trusted
 
     public Object getData() {
         return data;
+    }
+
+    @DataBoundSetter
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @CheckForNull
+    public String getType() {
+        return type;
     }
 
     @Extension @Symbol("properties")
