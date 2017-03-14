@@ -68,6 +68,7 @@ public class DockerPipelineFromDockerfile extends AbstractDockerAgent<DockerPipe
 
     @DataBoundSetter
     public void setAdditionalBuildArgs(String additionalBuildArgs) {
+        System.err.println("addtl - " + additionalBuildArgs);
         this.additionalBuildArgs = additionalBuildArgs;
     }
 
