@@ -209,7 +209,7 @@ public class AgentTest extends AbstractModelDefTest {
         sampleRepo.git("add", "Dockerfile");
         sampleRepo.git("commit", "--message=Dockerfile");
 
-        expect("fromDockerfile")
+        expect("additionalBuildArgs")
                 .logContains("[Pipeline] { (foo)",
                         "The answer is 42",
                         "-v /tmp:/tmp -p 8000:8000",
