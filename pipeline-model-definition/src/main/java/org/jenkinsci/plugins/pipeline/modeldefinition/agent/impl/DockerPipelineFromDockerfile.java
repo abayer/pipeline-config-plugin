@@ -59,6 +59,7 @@ public class DockerPipelineFromDockerfile extends AbstractDockerAgent<DockerPipe
 
     @DataBoundSetter
     public void setDir(String dir) {
+        System.err.println("setting dir to " + dir);
         this.dir = dir;
     }
 
