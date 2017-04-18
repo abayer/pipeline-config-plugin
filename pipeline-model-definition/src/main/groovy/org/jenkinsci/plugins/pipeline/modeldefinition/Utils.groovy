@@ -69,7 +69,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecution
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.jenkinsci.plugins.workflow.graph.BlockEndNode
 import org.jenkinsci.plugins.workflow.graph.BlockStartNode
-import org.jenkinsci.plugins.workflow.graphanalysis.AbstractFlowScanner
 import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner
 import org.jenkinsci.plugins.workflow.graphanalysis.LinearBlockHoppingScanner
 import org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode
@@ -420,12 +419,7 @@ public class Utils {
         CpsThread thread = CpsThread.current()
         CpsFlowExecution execution = thread.execution
 
-        AbstractFlowScanner scanner = null
-        if (execution.currentHeads.size() == 1) {
-            scanner = new LinearBlockHoppingScanner()
-        } else {
-            scanner = new ForkScanner()
-        }
+        ForkScanner scanner = new ForkScanner()
 
         return scanner.findFirstMatch(execution.currentHeads, null, isStageWithOptionalName(stageName))
     }

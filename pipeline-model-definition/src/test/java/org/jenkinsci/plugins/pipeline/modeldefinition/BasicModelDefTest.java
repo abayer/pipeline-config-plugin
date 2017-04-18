@@ -141,6 +141,14 @@ public class BasicModelDefTest extends AbstractModelDefTest {
         FlowNode shouldBeFailedNode = execution.getNode("" + (Integer.valueOf(endFoo.getId()) - 1));
         assertNotNull(shouldBeFailedNode);
         assertNotNull(shouldBeFailedNode.getError());
+        TagsAction parentTags = startFoo.getAction(TagsAction.class);
+        assertNotNull(parentTags);
+        assertNotNull(parentTags.getTags());
+        assertFalse(parentTags.getTags().isEmpty());
+        assertTrue(parentTags.getTags().containsKey(Utils.getStageStatusMetadata().getTagName()));
+        assertEquals(Utils.getStageStatusMetadata().getFailedAndContinued(),
+                parentTags.getTags().get(Utils.getStageStatusMetadata().getTagName()));
+
     }
 
     @Issue("JENKINS-41334")
