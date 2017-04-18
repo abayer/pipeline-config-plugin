@@ -64,6 +64,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -171,6 +172,13 @@ public class BasicModelDefTest extends AbstractModelDefTest {
         assertEquals(GenericStatus.FAILURE, StatusAndTiming.computeChunkStatus(b, null, startFirst, endFirst, null));
         assertNotNull(endFirst.getError());
 
+        TagsAction tags = startFirst.getAction(TagsAction.class);
+        assertNotNull(tags);
+        assertNotNull(tags.getTags());
+        assertFalse(tags.getTags().isEmpty());
+        assertTrue(tags.getTags().containsKey(Utils.getStageStatusMetadata().getTagName()));
+        assertEquals(Utils.getStageStatusMetadata().getFailedAndContinued(),
+                tags.getTags().get(Utils.getStageStatusMetadata().getTagName()));
         FlowNode shouldBeFailedNode = execution.getNode("" + (Integer.valueOf(endFirst.getId()) - 1));
         assertNotNull(shouldBeFailedNode);
         assertNotNull(shouldBeFailedNode.getError());
