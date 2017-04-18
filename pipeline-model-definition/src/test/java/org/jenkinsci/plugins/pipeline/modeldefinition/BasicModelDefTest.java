@@ -172,13 +172,22 @@ public class BasicModelDefTest extends AbstractModelDefTest {
         assertEquals(GenericStatus.FAILURE, StatusAndTiming.computeChunkStatus(b, null, startFirst, endFirst, null));
         assertNotNull(endFirst.getError());
 
-        TagsAction tags = startFirst.getAction(TagsAction.class);
-        assertNotNull(tags);
-        assertNotNull(tags.getTags());
-        assertFalse(tags.getTags().isEmpty());
-        assertTrue(tags.getTags().containsKey(Utils.getStageStatusMetadata().getTagName()));
+        TagsAction nestedTags = startFirst.getAction(TagsAction.class);
+        assertNotNull(nestedTags);
+        assertNotNull(nestedTags.getTags());
+        assertFalse(nestedTags.getTags().isEmpty());
+        assertTrue(nestedTags.getTags().containsKey(Utils.getStageStatusMetadata().getTagName()));
         assertEquals(Utils.getStageStatusMetadata().getFailedAndContinued(),
-                tags.getTags().get(Utils.getStageStatusMetadata().getTagName()));
+                nestedTags.getTags().get(Utils.getStageStatusMetadata().getTagName()));
+
+        TagsAction parentTags = startFoo.getAction(TagsAction.class);
+        assertNotNull(parentTags);
+        assertNotNull(parentTags.getTags());
+        assertFalse(parentTags.getTags().isEmpty());
+        assertTrue(parentTags.getTags().containsKey(Utils.getStageStatusMetadata().getTagName()));
+        assertEquals(Utils.getStageStatusMetadata().getFailedAndContinued(),
+                parentTags.getTags().get(Utils.getStageStatusMetadata().getTagName()));
+
         FlowNode shouldBeFailedNode = execution.getNode("" + (Integer.valueOf(endFirst.getId()) - 1));
         assertNotNull(shouldBeFailedNode);
         assertNotNull(shouldBeFailedNode.getError());
