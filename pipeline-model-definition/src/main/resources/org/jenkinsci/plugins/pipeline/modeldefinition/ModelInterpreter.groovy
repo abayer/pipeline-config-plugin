@@ -362,7 +362,7 @@ public class ModelInterpreter implements Serializable {
                         Utils.logToTaskListener("Stage '${thisStage.name}' skipped due to earlier stage(s) marking the build as unstable")
                         Utils.markStageSkippedForUnstable(thisStage.name)
                     } else {
-                        withEnvBlock(thisStage.getEnvVars()) {
+                        withEnvBlock(thisStage.getEnvVars(root, script)) {
                             if (evaluateWhen(thisStage.when)) {
                                 if (thisStage.stages != null) {
                                     def parallelStages = [:]
