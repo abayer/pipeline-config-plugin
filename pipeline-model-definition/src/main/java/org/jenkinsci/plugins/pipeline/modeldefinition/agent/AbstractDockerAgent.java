@@ -90,6 +90,7 @@ public abstract class AbstractDockerAgent<D extends AbstractDockerAgent<D>> exte
 
     @DataBoundSetter
     public void setArgs(String args) {
+        System.err.println("Args in: " + args);
         this.args = args;
     }
 }
