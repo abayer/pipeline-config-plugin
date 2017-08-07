@@ -179,6 +179,21 @@ public class DeclarativeDockerUtilsTest extends AbstractModelDefTest {
     }
 
     @Test
+    public void agentDockerWithEnvInArgs() throws Exception {
+        assumeDocker();
+        Slave s = j.createOnlineSlave();
+        s.setLabelString("notthis");
+        env(s).put("DOCKER_INDICATOR", "WRONG").set();
+        s = j.createOnlineSlave();
+        s.setLabelString("thisone");
+        env(s).put("DOCKER_INDICATOR", "CORRECT").set();
+        GlobalConfig.get().setDockerLabel("thisone");
+        GlobalConfig.get().setRegistry(null);
+
+        expect("agentWithDockerEnvInArgs").runFromRepo(false).logContains("Running on assumed Docker agent").go();
+    }
+
+    @Test
     public void runsOnSpecifiedSlave() throws Exception {
         assumeDocker();
         Slave s = j.createOnlineSlave();
