@@ -40,6 +40,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.config.FolderConfig;
 import org.jenkinsci.plugins.pipeline.modeldefinition.config.GlobalConfig;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -178,6 +179,7 @@ public class DeclarativeDockerUtilsTest extends AbstractModelDefTest {
 
     }
 
+    @Issue("JENKINS-44352")
     @Test
     public void agentDockerWithEnvInArgs() throws Exception {
         assumeDocker();
@@ -190,7 +192,7 @@ public class DeclarativeDockerUtilsTest extends AbstractModelDefTest {
         GlobalConfig.get().setDockerLabel("thisone");
         GlobalConfig.get().setRegistry(null);
 
-        expect("agentWithDockerEnvInArgs").runFromRepo(false).logContains("Running on assumed Docker agent").go();
+        expect("agentDockerWithEnvInArgs").runFromRepo(false).logContains("Running on assumed Docker agent").go();
     }
 
     @Test
