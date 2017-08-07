@@ -38,6 +38,7 @@ public class DockerPipeline extends AbstractDockerAgent<DockerPipeline> {
     @DataBoundConstructor
     public DockerPipeline(@Nonnull String image) {
         this.image = image;
+        System.err.println("IMG IS " + image);
     }
 
     public @Nonnull String getImage() {
