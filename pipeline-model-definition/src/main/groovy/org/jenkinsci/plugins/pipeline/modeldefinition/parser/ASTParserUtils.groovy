@@ -334,8 +334,11 @@ class ASTParserUtils {
                         Expression singleArg = args.get(0)
                         if (singleArg instanceof ClosureExpression) {
                             mappedClosure.addMapEntryExpression(mce.method, recurseAndTransformMappedClosure(singleArg))
-                        } else {
+                        } else if (singleArg instanceof ConstantExpression) {
                             mappedClosure.addMapEntryExpression(mce.method, singleArg)
+                        } else {
+                            // Lazy evaluation of non-constants
+                            mappedClosure.addMapEntryExpression(mce.method, closureX(block(stmt(singleArg))))
                         }
                     }
                 }
