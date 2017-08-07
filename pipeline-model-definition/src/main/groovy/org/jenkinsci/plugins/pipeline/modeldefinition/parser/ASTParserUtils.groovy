@@ -609,7 +609,7 @@ class ASTParserUtils {
                         } else {
                             // Lazy evaluation of non-constants
                             mappedClosure.addMapEntryExpression(mce.method, translateEnvironmentValue(mce.methodAsString,
-                                singleArg, []))
+                                singleArg, [] as Set))
                         }
                     }
                 }

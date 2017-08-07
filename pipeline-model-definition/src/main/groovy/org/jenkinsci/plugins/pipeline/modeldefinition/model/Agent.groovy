@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.pipeline.modeldefinition.model
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import org.jenkinsci.plugins.pipeline.modeldefinition.agent.DeclarativeAgent
 import org.jenkinsci.plugins.pipeline.modeldefinition.agent.DeclarativeAgentDescriptor
 import org.jenkinsci.plugins.pipeline.modeldefinition.agent.impl.None
@@ -33,6 +34,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.options.impl.SkipDefaultCh
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 import org.jenkinsci.plugins.structs.SymbolLookup
 import org.jenkinsci.plugins.structs.describable.UninstantiatedDescribable
+import org.jenkinsci.plugins.workflow.cps.CpsScript
 
 import javax.annotation.CheckForNull
 
@@ -47,6 +49,8 @@ import javax.annotation.CheckForNull
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Agent extends MappedClosure<Object,Agent> implements Serializable {
 
+    private CpsScript script
+
     @Whitelisted
     Agent(Map<String,Object> inMap) {
         resultMap = inMap
@@ -55,6 +59,15 @@ public class Agent extends MappedClosure<Object,Agent> implements Serializable {
     void replaceMap(Map<String,Object> newMap) {
         resultMap.clear()
         resultMap.putAll(newMap)
+    }
+
+    void setScript(CpsScript s) {
+        this.script = s
+    }
+
+    @Whitelisted
+    Object getScriptPropOrParam(String name) {
+        return Utils.getScriptPropOrParam(script, name)
     }
 
     @Deprecated
