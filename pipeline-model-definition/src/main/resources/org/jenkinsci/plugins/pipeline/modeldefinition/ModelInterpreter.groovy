@@ -377,10 +377,29 @@ public class ModelInterpreter implements Serializable {
                 body.call()
             }.call()
         } else {
+            agent.replaceMap(evaluateAgentVariables(agent.getMap()))
             return agent.getDeclarativeAgent(root, context).getScript(script).run {
                 body.call()
             }.call()
         }
+    }
+
+    Map<String,Object> evaluateAgentVariables(Map<String,Object> inMap) {
+        Map<String,Object> newMap = [:]
+
+        inMap.each { k, v ->
+            if (v instanceof Closure) {
+                v.delegate = script
+                v.resolveStrategy = DELEGATE_FIRST
+                newMap.put(k, v.call())
+            } else if (v instanceof Map) {
+                newMap.put(k, evaluateAgentVariables(v))
+            } else {
+                newMap.put(k, v)
+            }
+        }
+
+        return newMap
     }
 
     /**

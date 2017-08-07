@@ -52,6 +52,11 @@ public class Agent extends MappedClosure<Object,Agent> implements Serializable {
         resultMap = inMap
     }
 
+    void replaceMap(Map<String,Object> newMap) {
+        resultMap.clear()
+        resultMap.putAll(newMap)
+    }
+
     @Deprecated
     public DeclarativeAgent getDeclarativeAgent(Object context) {
         return getDeclarativeAgent(null, context)
