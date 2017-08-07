@@ -390,7 +390,7 @@ public class ModelInterpreter implements Serializable {
         inMap.each { k, v ->
             if (v instanceof Closure) {
                 v.delegate = script
-                v.resolveStrategy = DELEGATE_FIRST
+                v.resolveStrategy = Closure.DELEGATE_FIRST
                 newMap.put(k, v.call())
             } else if (v instanceof Map) {
                 newMap.put(k, evaluateAgentVariables(v))
