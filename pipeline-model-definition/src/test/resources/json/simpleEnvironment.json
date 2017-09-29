@@ -7,7 +7,7 @@
         {
           "name": "echo",
           "arguments": [          {
-            "key": "script",
+            "key": "message",
             "value":             {
               "isLiteral": false,
               "value": "\"FOO is $FOO\""
@@ -17,7 +17,7 @@
         {
           "name": "echo",
           "arguments": [          {
-            "key": "script",
+            "key": "message",
             "value":             {
               "isLiteral": false,
               "value": "\"_UNDERSCORE is $_UNDERSCORE\""

@@ -7,7 +7,7 @@
         {
           "name": "echo",
           "arguments": [          {
-            "key": "script",
+            "key": "message",
             "value":             {
               "isLiteral": false,
               "value": "\"FOO is $FOO\""
@@ -17,7 +17,7 @@
         {
           "name": "echo",
           "arguments": [          {
-            "key": "script",
+            "key": "message",
             "value":             {
               "isLiteral": false,
               "value": "\"BAR is $BAR\""
@@ -27,7 +27,7 @@
         {
           "name": "echo",
           "arguments": [          {
-            "key": "script",
+            "key": "message",
             "value":             {
               "isLiteral": false,
               "value": "\"BAZ is $BAZ\""
@@ -37,7 +37,7 @@
         {
           "name": "echo",
           "arguments": [          {
-            "key": "script",
+            "key": "message",
             "value":             {
               "isLiteral": false,
               "value": "\"SPLODE is $SPLODE\""

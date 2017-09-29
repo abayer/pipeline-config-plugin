@@ -6,7 +6,7 @@
       "steps": [      {
         "name": "echo",
         "arguments": [        {
-          "key": "script",
+          "key": "message",
           "value":           {
             "isLiteral": false,
             "value": "\"FOO is $FOO\""
