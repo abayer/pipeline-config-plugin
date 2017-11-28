@@ -28,4 +28,5 @@ package org.jenkinsci.plugins.pipeline.modeldefinition.model
  * Marker interface to show classes that can be used as parallel content.
  */
 interface ParallelContent {
+    String getName()
 }
