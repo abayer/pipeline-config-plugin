@@ -288,17 +288,15 @@ class ModelParser implements Parser {
         def r = new ModelASTParallelStageGroup(stmt)
 
         def m = matchBlockStatement(stmt)
-        if (!m?.methodName?.equals("group")) {
-            if (m?.methodName?.equals("stage")) {
-                return parseStage(stmt)
-            } else {
-                // Not sure of a better way to deal with this - it's a full-on parse-time failure.
-                errorCollector.error(r, Messages.ModelParser_ExpectedParallelGroup())
-                return null
-            }
+        if (m?.methodName?.equals("stage")) {
+            return parseStage(stmt)
+        } else if (m?.methodName != ModelASTParallelStageGroup.ELEMENT_NAME) {
+            // Not sure of a better way to deal with this - it's a full-on parse-time failure.
+            errorCollector.error(r, Messages.ModelParser_ExpectedParallelGroup())
+            return null
         }
 
-        def nameExp = m.getArgument(0);
+        def nameExp = m.getArgument(0)
         if (nameExp==null) {
             // Not sure of a better way to deal with this - it's a full-on parse-time failure.
             errorCollector.error(r, Messages.ModelParser_ExpectedParallelGroupName())
@@ -312,15 +310,8 @@ class ModelParser implements Parser {
         return r
     }
 
-    private boolean hasAllSameNameMethods(@Nonnull BlockStatementMatch block, @Nonnull String name) {
-        return asBlock(block.body.code).every { stmt ->
-            def m = matchBlockStatement(stmt)
-            return m?.methodName == name
-        }
-    }
-
     @Nonnull ModelASTEnvironment parseEnvironment(Statement stmt) {
-        def r = new ModelASTEnvironment(stmt);
+        def r = new ModelASTEnvironment(stmt)
 
         def m = matchBlockStatement(stmt)
         if (m==null) {
