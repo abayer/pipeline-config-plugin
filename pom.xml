@@ -285,6 +285,12 @@
         <artifactId>annotation-indexer</artifactId>
         <version>1.12</version>
       </dependency>
+      <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>${antlr4.version}</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -364,6 +370,7 @@
     <groovy.version>2.4.7</groovy.version>
     <concurrency>0.5C</concurrency>
     <argLine>-Djava.awt.headless=true -Xmx4g -Xms512m -XX:MaxPermSize=512m</argLine>
+    <antlr4.version>4.5</antlr4.version>
   </properties>
 
   <repositories>
