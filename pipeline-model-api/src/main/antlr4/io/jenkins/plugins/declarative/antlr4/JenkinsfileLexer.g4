@@ -8,49 +8,6 @@ COLON : ':';
 COMMA : ',';
 EQUALS : '=';
 
-ID : Letter LetterOrDigit*;
-INT : DIGIT+;
-BOOLEAN : TRUE
-          | FALSE
-          ;
-TRUE : 'true';
-FALSE: 'false';
-BLOCK_BODY : [a-zA-Z]+;
-STRING : (QUOTE_CHAR (STRING_CHAR | DOUBLEQUOTE_CHAR | ESC)* QUOTE_CHAR)
-         |
-         (DOUBLEQUOTE_CHAR (STRING_CHAR | QUOTE_CHAR | ESC)* DOUBLEQUOTE_CHAR)
-         |
-         (TRIPLE_SINGLEQUOTE TSQ_CHAR* TRIPLE_SINGLEQUOTE)
-         |
-         (TRIPLE_DOUBLEQUOTE TDQ_CHAR* TRIPLE_DOUBLEQUOTE)
-         ;
-
-/* skip all whitespace */
-WS : (' ' | NEWLINE | TAB) -> skip;
-
-/* To be re-used in all numeric lexer rules */
-fragment DIGIT : [0-9]      ;
-/* Used for crafting rules that respect Windows and Unix newlnies */
-fragment NEWLINE : '\r'? '\n' ;
-fragment TAB : '\t' ;
-fragment ESC : '\\' [btnfr"'\\];
-fragment STRING_CHAR : ~['"\r\n];
-fragment QUOTE_CHAR : '\'';
-fragment DOUBLEQUOTE_CHAR : '"';
-fragment Letter : [a-zA-Z$_] ;
-fragment LetterOrDigit : [a-zA-Z0-9$_] ;
-fragment DOLLAR : '$';
-fragment TRIPLE_DOUBLEQUOTE : '"""';
-fragment TRIPLE_SINGLEQUOTE : '\'\'\'';
-fragment DQ_CHAR : ~["\\$] | ESC;
-fragment SQ_CHAR : ~['\\] | ESC;
-fragment TDQ_CHAR : ~["\\$]
-                  | DOUBLEQUOTE_CHAR { !(_input.LA(1) == '"' && _input.LA(2) == '"') }?
-                  | ESC;
-fragment TSQ_CHAR : ~['\\]
-                  | QUOTE_CHAR { !(_input.LA(1) == '\'' && _input.LA(2) == '\'') }?
-                  | ESC;
-
 /* Directive/section names */
 ENVIRONMENT : 'environment';
 TOOLS : 'tools';
@@ -82,38 +39,61 @@ LINE_COMMENT
     :   '//' ~[\r\n]* -> channel(HIDDEN)
     ;
 
-// Groovy gstring
-GSTRING_BEGIN
-    : DOUBLEQUOTE_CHAR DQ_CHAR* DOLLAR -> pushMode(DQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
-    ;
+ID : Letter LetterOrDigit*;
+INT : DIGIT+;
+BOOLEAN : TRUE
+          | FALSE
+          ;
+TRUE : 'true';
+FALSE: 'false';
+BLOCK_BODY : [a-zA-Z]+;
+SQ_STRING : QUOTE_CHAR (STRING_CHAR | DOUBLEQUOTE_CHAR | ESC)* QUOTE_CHAR;
+TSQ_STRING : TRIPLE_SINGLEQUOTE TSQ_CHAR* TRIPLE_SINGLEQUOTE;
+NON_EXPR_DQ_STRING : DOUBLEQUOTE_CHAR (STRING_CHAR | QUOTE_CHAR | ESC)* DOUBLEQUOTE_CHAR;
+NON_EXPR_STRING : SQ_STRING;
+/* skip all whitespace */
+WS : (' ' | NEWLINE | TAB) -> skip;
 
-TDQ_GSTRING_BEGIN
-    : TRIPLE_DOUBLEQUOTE TDQ_CHAR* DOLLAR -> type(GSTRING_BEGIN), pushMode(TDQ_GSTRING_MODE), pushMode(GSTRING_TYPE_SELECTOR_MODE)
-    ;
+/* To be re-used in all numeric lexer rules */
+fragment DIGIT : [0-9]      ;
+/* Used for crafting rules that respect Windows and Unix newlnies */
+fragment NEWLINE : '\r'? '\n' ;
+fragment TAB : '\t' ;
+fragment ESC : '\\' [btnfr"'\\];
+fragment STRING_CHAR : ~('\'' | '"' | '\r' | '\n');
+fragment QUOTE_CHAR : '\'';
+fragment DOUBLEQUOTE_CHAR : '"';
+DQ_OPEN : DOUBLEQUOTE_CHAR -> pushMode(DqStringMode);
+fragment Letter : [a-zA-Z$_] ;
+fragment LetterOrDigit : [a-zA-Z0-9$_] ;
+fragment DOLLAR : '$';
+fragment TRIPLE_DOUBLEQUOTE : '"""';
+TDQ_OPEN : TRIPLE_DOUBLEQUOTE -> pushMode(TdqStringMode);
+fragment TRIPLE_SINGLEQUOTE : '\'\'\'';
+fragment DQ_CHAR : ~('"' | '\\' | '$') | ESC;
+fragment SQ_CHAR : ~['\\] | ESC;
+fragment TDQ_CHAR : ~["\\$]
+                  | DOUBLEQUOTE_CHAR { !(_input.LA(1) == '"' && _input.LA(2) == '"') }?
+                  | ESC;
+fragment TSQ_CHAR : ~['\\]
+                  | QUOTE_CHAR { !(_input.LA(1) == '\'' && _input.LA(2) == '\'') }?
+                  | ESC;
 
-mode DQ_GSTRING_MODE;
-GSTRING_END
+mode DqStringMode;
+DQ_CLOSE
     :   DOUBLEQUOTE_CHAR -> popMode
     ;
-GSTRING_PART
-    :   DOLLAR -> pushMode(GSTRING_TYPE_SELECTOR_MODE)
-    ;
-GSTRING_CHAR
-    :   DQ_CHAR -> more
-    ;
+DqStrText : DQ_CHAR+;
+DqStrExprStart : '${' -> pushMode(GStringExpression);
 
-mode TDQ_GSTRING_MODE;
-TDQ_GSTRING_END
-    :   TRIPLE_DOUBLEQUOTE -> type(GSTRING_END), popMode
+mode TdqStringMode;
+TDQ_CLOSE
+    :   TRIPLE_DOUBLEQUOTE -> popMode
     ;
-TDQ_GSTRING_PART
-    :   DOLLAR -> type(GSTRING_PART), pushMode(GSTRING_TYPE_SELECTOR_MODE)
-    ;
-TDQ_GSTRING_CHAR
-    :   TDQ_CHAR -> more
-    ;
+TdqQuote : '"'+;
+TdqStrText : TDQ_CHAR+ | '$';
+TdqStrExprStart : '${' -> pushMode(GStringExpression);
 
-mode GSTRING_TYPE_SELECTOR_MODE;
-GSTRING_BRACKET_OPEN
-    :   '{' -> type(BRACKET_OPEN), popMode, pushMode(DEFAULT_MODE)
-    ;
+mode GStringExpression;
+GStrExpr_BRACKET_CLOSE : BRACKET_CLOSE -> popMode, type(BRACKET_CLOSE);
+GStrExpr_ID : ID -> type(ID);
